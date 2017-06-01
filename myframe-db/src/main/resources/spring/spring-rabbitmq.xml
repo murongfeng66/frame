@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:rabbit="http://www.springframework.org/schema/rabbit"
+       xmlns="http://www.springframework.org/schema/beans"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+                        http://www.springframework.org/schema/beans/spring-beans-4.1.xsd  
+                        http://www.springframework.org/schema/context   
+                        http://www.springframework.org/schema/context/spring-context-4.1.xsd  
+					    http://www.springframework.org/schema/rabbit
+					    http://www.springframework.org/schema/rabbit/spring-rabbit-1.5.xsd
+                        ">
+
+    <context:component-scan base-package="com.zjw.myframe.dao.rabbitmq"/>
+
+    <rabbit:connection-factory id="rabbitmqConnectionFactory"
+                               host="${rabbitmq.host}"
+                               username="${rabbitmq.username}"
+                               password="${rabbitmq.password}"
+                               port="${rabbitmq.port}"/>
+
+    <rabbit:admin connection-factory="rabbitmqConnectionFactory"/>
+
+    <bean id="rabbitmqTemplate" class="org.springframework.amqp.rabbit.core.RabbitTemplate">
+        <property name="exchange" value="send-exchange"/>
+        <property name="connectionFactory" ref="rabbitmqConnectionFactory"/>
+        <property name="messageConverter" ref="jsonMessageConverter"/>
+    </bean>
+
+    <bean id="jsonMessageConverter" class="org.springframework.amqp.support.converter.Jackson2JsonMessageConverter"/>
+
+    <rabbit:queue id="DLX.send" name="DLX.send" durable="true" auto-delete="false" exclusive="false"/>
+
+    <rabbit:queue id="send" name="send" durable="true" auto-delete="false" exclusive="false">
+        <rabbit:queue-arguments>
+            <entry key="x-dead-letter-exchange" value="DLX.send-exchange"/>
+            <entry key="x-dead-letter-routing-key" value="DLX.SendRouting"/>
+            <entry key="x-message-ttl" value="${rabbitmq.x-message-ttl}" value-type="java.lang.Long"/>
+        </rabbit:queue-arguments>
+    </rabbit:queue>
+
+    <rabbit:direct-exchange id="DLX.send-exchange" name="DLX.send-exchange" durable="true" auto-delete="false">
+        <rabbit:bindings>
+            <rabbit:binding queue="DLX.send" key="DLX.SendRouting"/>
+        </rabbit:bindings>
+    </rabbit:direct-exchange>
+
+    <rabbit:direct-exchange id="send-exchange" name="send-exchange" durable="true" auto-delete="false">
+        <rabbit:bindings>
+            <rabbit:binding queue="send" key="sendRouting"/>
+        </rabbit:bindings>
+    </rabbit:direct-exchange>
+
+    <bean id="receiveSendMessageListener" class="org.springframework.amqp.core.MessageListener"/>
+
+    <bean id="DLX.receiveSendMessageListener" class="com.zjw.myframe.dao.rabbitmq.DLXReceiveSendMessageListener"/>
+
+    <rabbit:listener-container connection-factory="rabbitmqConnectionFactory" acknowledge="auto">
+        <rabbit:listener queues="send" ref="receiveSendMessageListener"/>
+    </rabbit:listener-container>
+
+    <rabbit:listener-container connection-factory="rabbitmqConnectionFactory" acknowledge="auto">
+        <rabbit:listener queues="DLX.send" ref="DLX.receiveSendMessageListener"/>
+    </rabbit:listener-container>
+
+</beans>

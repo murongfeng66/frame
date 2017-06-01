@@ -1,0 +1,90 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <link href="/resources/static/h-ui/css/H-ui.min.css" rel="stylesheet" type="text/css"/>
+    <link href="/resources/static/h-ui.admin/css/H-ui.login.css" rel="stylesheet" type="text/css"/>
+    <link href="/resources/static/h-ui.admin/css/style.css" rel="stylesheet" type="text/css"/>
+    <link href="/resources/lib/Hui-iconfont/1.0.7/iconfont.css" rel="stylesheet" type="text/css"/>
+    <link href="/resources/lib/icheck/icheck.css" rel="stylesheet" type="text/css"/>
+    <title>后台登录</title>
+</head>
+<body>
+<div class="header"><span>后台管理</span></div>
+<div class="loginWraper">
+    <div id="loginForm" class="loginBox">
+        <form class="form form-horizontal">
+            <div class="row cl">
+                <label class="form-label col-xs-3">
+                    <i class="Hui-iconfont Hui-iconfont-user2"></i>
+                </label>
+                <div class="formControls col-xs-8">
+                    <input id="loginname" name="loginname" type="text" placeholder="账户" class="input-text size-L radius">
+                </div>
+            </div>
+            <div class="row cl">
+                <label class="form-label col-xs-3">
+                    <i class="Hui-iconfont Hui-iconfont-suoding"></i>
+                </label>
+                <div class="formControls col-xs-8">
+                    <input id="password" name="password" type="password" placeholder="密码" class="input-text size-L radius">
+                </div>
+            </div>
+            <div class="row cl">
+                <label class="form-label col-xs-3">
+                </label>
+                <div class="formControls col-xs-8">
+                    <div class="col-xs-6" style="padding-left: 0px">
+                        <input name="verifyCode" type="text" placeholder="验证码" class="input-text size-L radius" style="width: 100%">
+                    </div>
+                    <div class="col-xs-6" style="padding-right: 0px">
+                        <img id="verifyCode" name="verifyCode" class="radius" src="/verifyCode" onclick="login.updateVerifyCode(this)">
+                    </div>
+                </div>
+            </div>
+            <div class="row cl">
+                <div class="formControls col-xs-8 col-xs-offset-3">
+                    <div class="check-box">
+                        <input type="checkbox" id="rememberMe">
+                        <label for="rememberMe">记住我</label>
+                    </div>
+                </div>
+            </div>
+            <div class="row cl">
+                <div class="formControls col-xs-8 col-xs-offset-3">
+                    <input name="" type="button" class="btn btn-success radius size-L" value="&nbsp;登&nbsp;&nbsp;&nbsp;&nbsp;录&nbsp;" onclick="login.login()" style="float: left">
+                    <input name="" type="reset" class="btn btn-default radius size-L" value="&nbsp;取&nbsp;&nbsp;&nbsp;&nbsp;消&nbsp;" style="float: right">
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="footer">Copyright 朱剑文 by H-ui.admin.v2.3</div>
+<script type="text/javascript" src="/resources/lib/jquery/1.9.1/jquery.min.js"></script>
+<script type="text/javascript" src="/resources/static/h-ui/js/H-ui.js"></script>
+<script type="text/javascript" src="/resources/js/common.js"></script>
+<script type="text/javascript" src="/resources/lib/icheck/jquery.icheck.min.js"></script>
+<script>
+    var login = {};
+    $(function () {
+        $('#rememberMe').iCheck({
+            checkboxClass: 'icheckbox-blue',
+            radioClass: 'iradio-blue',
+            increaseArea: '20%'
+        })
+    });
+    login.login = function () {
+        common.ajaxRequest({
+            url: '/login',
+            data: $('#loginForm').serializeJson(),
+            success: function (result) {
+                window.location.href = '/toMain';
+            }
+        });
+    };
+    login.updateVerifyCode = function (e) {
+        e.src = '/verifyCode?' + Math.random();
+    }
+</script>
+</body>
+</html>

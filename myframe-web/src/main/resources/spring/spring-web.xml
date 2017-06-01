@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns="http://www.springframework.org/schema/beans"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+                        http://www.springframework.org/schema/beans/spring-beans-4.1.xsd  
+                        http://www.springframework.org/schema/context   
+                        http://www.springframework.org/schema/context/spring-context-4.1.xsd  
+                        http://www.springframework.org/schema/mvc  
+                        http://www.springframework.org/schema/mvc/spring-mvc-4.1.xsd
+                        http://www.springframework.org/schema/aop   
+                        http://www.springframework.org/schema/aop/spring-aop-4.1.xsd
+                        ">
+    <!--开发-->
+    <context:property-placeholder location="file:/E:/conf/myframe/mongodb.properties" ignore-unresolvable="true" ignore-resource-not-found="true" order="2" system-properties-mode="NEVER" />
+    <context:property-placeholder location="file:/E:/conf/myframe/rabbitmq.properties" ignore-unresolvable="true" ignore-resource-not-found="true" order="2" system-properties-mode="NEVER" />
+    <context:property-placeholder location="file:/E:/conf/myframe/redis.properties" ignore-unresolvable="true" ignore-resource-not-found="true" order="2" system-properties-mode="NEVER" />
+    <context:property-placeholder location="file:/E:/conf/myframe/mysql.properties" ignore-unresolvable="true" ignore-resource-not-found="true" order="2" system-properties-mode="NEVER" />
+    <context:property-placeholder location="file:/E:/conf/myframe/activemq.properties" ignore-unresolvable="true" ignore-resource-not-found="true" order="2" system-properties-mode="NEVER" />
+    <!--部署-->
+    <context:property-placeholder location="file:/home/conf/myframe/mongodb.properties" ignore-unresolvable="true" ignore-resource-not-found="true" order="2" system-properties-mode="NEVER" />
+    <context:property-placeholder location="file:/home/conf/myframe/rabbitmq.properties" ignore-unresolvable="true" ignore-resource-not-found="true" order="2" system-properties-mode="NEVER" />
+    <context:property-placeholder location="file:/home/conf/myframe/redis.properties" ignore-unresolvable="true" ignore-resource-not-found="true" order="2" system-properties-mode="NEVER" />
+    <context:property-placeholder location="file:/home/conf/myframe/mysql.properties" ignore-unresolvable="true" ignore-resource-not-found="true" order="2" system-properties-mode="NEVER" />
+    <context:property-placeholder location="file:/home/conf/myframe/activemq.properties" ignore-unresolvable="true" ignore-resource-not-found="true" order="2" system-properties-mode="NEVER" />
+
+    <!-- <mvc:annotation-driven conversion-service="conversionService"/> -->
+    <mvc:annotation-driven conversion-service="conversionService">
+        <mvc:message-converters register-defaults="true">
+            <bean class="org.springframework.http.converter.StringHttpMessageConverter">
+                <constructor-arg value="UTF-8"/>
+            </bean>
+            <bean id="fastJsonHttpMessageConverter" class="com.alibaba.fastjson.support.spring.FastJsonHttpMessageConverter">
+                <property name="supportedMediaTypes">
+                    <list>
+                        <value>application/json;charset=UTF-8</value>
+                        <value>text/html;charset=UTF-8</value>
+                        <value>text/plain;charset=UTF-8</value>
+                    </list>
+                </property>
+                <property name="features">
+                    <array>
+                        <value>WriteMapNullValue</value>
+                        <value>WriteNullStringAsEmpty</value>
+                        <value>WriteDateUseDateFormat</value>
+                    </array>
+                </property>
+            </bean>
+        </mvc:message-converters>
+    </mvc:annotation-driven>
+
+    <aop:aspectj-autoproxy/>
+
+    <import resource="classpath*:spring/spring-manager.xml"/>
+
+    <import resource="classpath*:spring/spring-view-thymeleaf.xml"/>
+
+    <context:component-scan base-package="com.zjw.myframe.web.controller"/>
+
+    <mvc:resources mapping="/resources/**" location="/resources/"/>
+
+    <bean id="conversionService" class="org.springframework.format.support.FormattingConversionServiceFactoryBean">
+        <property name="formatters">
+            <set>
+                <bean class="com.zjw.myframe.web.formatter.DateFormatter"/>
+            </set>
+        </property>
+    </bean>
+
+    <bean id="log4jInitialization" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="targetClass" value="org.springframework.util.Log4jConfigurer"/>
+        <property name="targetMethod" value="initLogging"/>
+        <property name="arguments">
+            <list>
+                <value>classpath:log4j.properties</value>
+            </list>
+        </property>
+    </bean>
+
+    <bean class="com.zjw.myframe.web.SimpleMappingExceptionResolver">
+        <property name="pagePath" value="error/page.jsp"/>
+        <property name="jsonPath" value="error/json.jsp"/>
+    </bean>
+
+     	<mvc:interceptors>
+         	<mvc:interceptor>
+         		<mvc:mapping path="/**"/>
+         		<mvc:exclude-mapping path="/resources/**"/>
+         		<mvc:exclude-mapping path="/verifyCode"/>
+         		<bean class="com.zjw.myframe.web.controller.interceptor.PermissionInterceptor">
+         			<property name="logoutUrl" value="/logout" />
+         			<property name="excludePermissionAndLoginUrls">
+         				<list>
+         					<value>/</value>
+         					<value>/login</value>
+         					<value>/logout</value>
+         					<value>/toLimeOut</value>
+         				</list>
+         			</property>
+                    <property name="excludePermissionUrls">
+                        <list>
+                            <value>/resource/menu</value>
+                            <value>/toMain</value>
+                        </list>
+                    </property>
+         		</bean>
+         	</mvc:interceptor>
+         </mvc:interceptors>
+
+</beans>

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zjw.myframe.dao.dao.baseUser.BaseUserMapper">
+
+    <resultMap id="baseUserMap" type="com.zjw.myframe.model.baseUser.BaseUser">
+        <id column="id" property="id"/>
+        <result column="username" property="username"/>
+        <result column="type" property="type"/>
+        <result column="status" property="status"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.zjw.myframe.dao.bean.baseUser.BaseUserBean" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO base_user
+        <trim prefix="(" suffixOverrides="," suffix=")">
+            <if test="username != null">
+                username,
+            </if>
+            <if test="type != null">
+                type,
+            </if>
+            <if test="status != null">
+                status,
+            </if>
+        </trim>
+        <trim prefix="VALUES(" suffixOverrides="," suffix=")">
+            <if test="username != null">
+                #{username},
+            </if>
+            <if test="type != null">
+                #{type},
+            </if>
+            <if test="status != null">
+                #{status},
+            </if>
+        </trim>
+    </insert>
+
+    <update id="update" parameterType="com.zjw.myframe.dao.bean.baseUser.BaseUserBean">
+        UPDATE base_user
+        <set>
+            <trim suffixOverrides=",">
+                <if test="username != null">
+                    username = #{username},
+                </if>
+                <if test="type != null">
+                    type = #{type},
+                </if>
+                <if test="status != null">
+                    status = #{status},
+                </if>
+            </trim>
+        </set>
+        <where>
+            id = #{id}
+        </where>
+    </update>
+    <select id="queryByParam" parameterType="com.zjw.myframe.dao.bean.baseUser.BaseUserListBean" resultMap="baseUserMap">
+        SELECT id, username, type, status
+        FROM base_user
+        <where>
+            <trim suffixOverrides=" and">
+                <if test="username != null">
+                    username like concat('%', #{username}, '%') and
+                </if>
+                <if test="type != null">
+                    type = #{type} and
+                </if>
+                <if test="status != null">
+                    status = #{status} and
+                </if>
+            </trim>
+        </where>
+    </select>
+    <select id="getById" parameterType="Long" resultMap="baseUserMap">
+        SELECT id, username, type, status
+        FROM base_user
+        WHERE id = #{id}
+    </select>
+
+</mapper>

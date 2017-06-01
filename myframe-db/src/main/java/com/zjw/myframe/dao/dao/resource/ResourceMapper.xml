@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zjw.myframe.dao.dao.resource.ResourceMapper">
+
+    <resultMap id="resourceMap" type="com.zjw.myframe.model.resource.Resource">
+        <id column="id" property="id"/>
+        <result column="pid" property="pid"/>
+        <result column="type" property="type"/>
+        <result column="name" property="name"/>
+        <result column="url" property="url"/>
+        <result column="icon" property="icon"/>
+        <result column="status" property="status"/>
+        <result column="sort" property="sort"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.zjw.myframe.dao.bean.resource.ResourceBean" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO resource
+        <trim prefix="(" suffixOverrides="," suffix=")">
+            <if test="pid != null">
+                pid,
+            </if>
+            <if test="type != null">
+                type,
+            </if>
+            <if test="name != null">
+                name,
+            </if>
+            <if test="url != null">
+                url,
+            </if>
+            <if test="icon != null">
+                icon,
+            </if>
+            <if test="status != null">
+                status,
+            </if>
+            <if test="sort != null">
+                sort,
+            </if>
+        </trim>
+        <trim prefix="VALUES(" suffixOverrides="," suffix=")">
+            <if test="pid != null">
+                #{pid},
+            </if>
+            <if test="type != null">
+                #{type},
+            </if>
+            <if test="name != null">
+                #{name},
+            </if>
+            <if test="url != null">
+                #{url},
+            </if>
+            <if test="icon != null">
+                #{icon},
+            </if>
+            <if test="status != null">
+                #{status},
+            </if>
+            <if test="sort != null">
+                #{sort},
+            </if>
+        </trim>
+    </insert>
+    <update id="update" parameterType="com.zjw.myframe.dao.bean.resource.ResourceBean">
+        UPDATE resource
+        <set>
+            <trim suffixOverrides=",">
+                <if test="pid != null">
+                    pid = #{pid},
+                </if>
+                <if test="type != null">
+                    type = #{type},
+                </if>
+                <if test="name != null">
+                    name = #{name},
+                </if>
+                <if test="url != null">
+                    url = #{url},
+                </if>
+                <if test="icon != null">
+                    icon = #{icon},
+                </if>
+                <if test="status != null">
+                    status = #{status},
+                </if>
+                <if test="sort != null">
+                    sort = #{sort},
+                </if>
+            </trim>
+        </set>
+        <where>
+            id = #{id}
+        </where>
+    </update>
+    <delete id="delete" parameterType="Long">
+        DELETE FROM resource WHERE id = #{id}
+    </delete>
+    <select id="queryMenu" resultMap="resourceMap">
+        SELECT id, pid, type, name, url, icon, status, sort
+        FROM resource r
+        INNER JOIN resource_user ru ON ru.resource_id = r.id AND ru.user_id = #{userId}
+        WHERE r.type = #{type} AND r.status = #{status}
+        ORDER BY r.pid, r.sort
+    </select>
+    <select id="queryByParam" resultMap="resourceMap">
+        SELECT id, pid, type, name, url, icon, status, sort
+        FROM  resource
+        <where>
+            <trim suffixOverrides=" and">
+                <if test="type != null">
+                    type = #{type} AND
+                </if>
+                <if test="name != null">
+                    name LIKE concat('%', #{name}, '%') AND
+                </if>
+                <if test="url != null">
+                    url LIKE concat('%', #{url}, '%') AND
+                </if>
+                <if test="status != null">
+                    status = #{status} AND
+                </if>
+            </trim>
+        </where>
+    </select>
+</mapper>
